@@ -1,608 +1,710 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#6366f1">
-    <meta name="description" content="Download video dari TikTok, Facebook, Instagram tanpa watermark">
-    <title>Video Downloader - No Watermark</title>
-    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVmlkZW8gRG93bmxvYWRlciIsInNob3J0X25hbWUiOiJWaWREb3duIiwic3RhcnRfdXJsIjoiLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMxMTExMTEiLCJ0aGVtZV9jb2xvciI6IiM2MzY2ZjEiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCM2FXUjBhRDBpTWpBd0lpQm9aV2xuYUhROUlqSXdNQ0lnZG1sbGQwSnZlRDBpTUNBd0lESXdNQ0F5TURBaUlIaHRiRzV6UFNKb2RIUndPaTh2ZDNkM0xuY3pMbTl5Wnk4eU1EQXdMM04yWnlJK1BISmxZM1FnZUQwaU1DSWdlVDBpTUNJZ2QybGtkR2c5SWpJd01DSWdhR1ZwWjJoMFBTSXlNREFpSUhKNFBTSXhOaUlnWm1sc2JEMGlJell6TmpabU1TSXZQanh3WVhSb0lHUTlJazB4TURBZ056QmpNQ0F4Tmkwek1pQXlPUzAxTmlBek1pMHpNaUF6TW1neU5DMHpNbU14Tmkwd01pQXlPUzB4TmlBek1pMHpNaUF6TWkwek1pQXlPUzB4TmlBek1pMHpNaUF6TW1neU5DMHpNbU14TmlBd0lESXlJREV5SURJNElESTRJREU1SURFNWJEUTBJRFF6SURJeklESTBJREkwSURJMGJDMDBNeUEwTkMweE9TMHhPV010TFRZdE5pMHhNaTB4TUMweE9DMHhOSGd0TWpRdE1qUXRNak10TWpNdE1qUXRNalJzTkRNdE5EUWdORE10TkRSRE1USTBJREUwTkNBeE1EQWdPVFlnTVRBd0lEY3dlaUlnWm1sc2JEMGlJMlptWmlJdlBqd3ZjM1puUGc9PSIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIn1dfQ==">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="description" content="Download video TikTok, Instagram, Facebook tanpa watermark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VidDown">
+<title>VidDown</title>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #fff;
-        }
+<!-- PWA Manifest inline -->
+<script>
+const manifestData = {
+  name: "VidDown - No Watermark",
+  short_name: "VidDown",
+  description: "Download TikTok, IG, FB tanpa watermark",
+  start_url: "./",
+  display: "standalone",
+  background_color: "#0a0a0a",
+  theme_color: "#0a0a0a",
+  orientation: "portrait",
+  icons: [
+    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230a0a0a'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle'%3E%E2%AC%87%EF%B8%8F%3C/text%3E%3C/svg%3E", sizes: "192x192", type: "image/svg+xml" },
+    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%230a0a0a'/%3E%3Ctext x='256' y='340' font-size='280' text-anchor='middle'%3E%E2%AC%87%EF%B8%8F%3C/text%3E%3C/svg%3E", sizes: "512x512", type: "image/svg+xml" }
+  ]
+};
+const blob = new Blob([JSON.stringify(manifestData)], {type: 'application/manifest+json'});
+const manifestUrl = URL.createObjectURL(blob);
+const link = document.createElement('link');
+link.rel = 'manifest';
+link.href = manifestUrl;
+document.head.appendChild(link);
+</script>
 
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            animation: fadeInDown 0.6s ease;
-        }
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --text: #f0f0f0;
+    --muted: #666;
+    --accent: #e8f542;
+    --accent-dim: rgba(232,245,66,0.12);
+    --red: #ff4d4d;
+    --green: #4dff91;
+    --green-dim: rgba(77,255,145,0.1);
+    --red-dim: rgba(255,77,77,0.1);
+    --radius: 14px;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
 
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 8px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        .header p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
 
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            animation: fadeInUp 0.6s ease;
-        }
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
 
-        .platforms {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+    width: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
 
-        .platform-btn {
-            flex: 1;
-            min-width: 80px;
-            padding: 12px 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
+  /* ── HEADER ── */
+  header {
+    padding: 52px 0 32px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
 
-        .platform-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
+  .logo {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 26px;
+    letter-spacing: -1px;
+    color: var(--text);
+  }
 
-        .platform-btn.active {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: #fff;
-            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
-        }
+  .logo span {
+    color: var(--accent);
+  }
 
-        .input-group {
-            margin-bottom: 20px;
-        }
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
 
-        .input-wrapper {
-            position: relative;
-        }
+  /* ── PLATFORM TABS ── */
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 20px;
+    background: var(--surface);
+    padding: 5px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
 
-        input[type="text"] {
-            width: 100%;
-            padding: 16px;
-            padding-right: 50px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 12px;
-            font-size: 15px;
-            transition: all 0.3s ease;
-            color: #333;
-        }
+  .tab {
+    padding: 10px 6px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
 
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #fff;
-            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
-        }
+  .tab:active { transform: scale(0.96); }
 
-        input[type="text"]::placeholder {
-            color: #999;
-        }
+  .tab.active {
+    background: var(--accent);
+    color: #0a0a0a;
+    font-weight: 600;
+  }
 
-        .clear-btn {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #999;
-            cursor: pointer;
-            font-size: 20px;
-            padding: 4px 8px;
-            display: none;
-        }
+  .tab-icon { font-size: 15px; }
 
-        .clear-btn:hover {
-            color: #666;
-        }
+  /* ── INPUT AREA ── */
+  .input-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 14px;
+    transition: border-color 0.2s;
+  }
 
-        input[type="text"]:not(:placeholder-shown) + .clear-btn {
-            display: block;
-        }
+  .input-card:focus-within {
+    border-color: var(--accent);
+  }
 
-        .download-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 12px;
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
+  .input-label {
+    font-size: 11px;
+    font-family: var(--mono);
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: block;
+  }
 
-        .download-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-        }
+  .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
 
-        .download-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+  .url-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    min-width: 0;
+  }
 
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
+  .url-input::placeholder { color: var(--muted); }
+  .url-input:focus { border-color: #444; }
 
-        .loading.active {
-            display: block;
-        }
+  .paste-btn {
+    padding: 12px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    line-height: 1;
+  }
 
-        .spinner {
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 3px solid #fff;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
+  .paste-btn:active { transform: scale(0.92); background: var(--border); }
 
-        .result {
-            margin-top: 20px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            display: none;
-        }
+  /* ── DOWNLOAD BTN ── */
+  .dl-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius);
+    color: #0a0a0a;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    letter-spacing: -0.2px;
+    margin-bottom: 16px;
+  }
 
-        .result.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
+  .dl-btn:active:not(:disabled) { transform: scale(0.98); opacity: 0.9; }
+  .dl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .result.error {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
+  /* ── RESULT ── */
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    display: none;
+    animation: slideUp 0.25s ease;
+    margin-bottom: 16px;
+  }
 
-        .result.success {
-            background: rgba(34, 197, 94, 0.2);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-        }
+  .result-card.visible { display: block; }
+  .result-card.err { border-color: var(--red); background: var(--red-dim); }
+  .result-card.ok { border-color: #333; }
 
-        .video-preview {
-            margin-top: 15px;
-            border-radius: 8px;
-            overflow: hidden;
-        }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-        .video-preview video {
-            width: 100%;
-            border-radius: 8px;
-        }
+  .result-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
 
-        .video-info {
-            margin-top: 15px;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            font-size: 14px;
-        }
+  .result-author {
+    font-size: 13px;
+    color: var(--accent);
+    font-family: var(--mono);
+    font-weight: 700;
+  }
 
-        .video-info p {
-            margin: 5px 0;
-        }
+  .result-title {
+    font-size: 13px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-        .quality-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 10px;
-            margin: 15px 0;
-        }
+  .result-links { display: flex; flex-direction: column; gap: 8px; }
 
-        .quality-btn {
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: #fff;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 13px;
-            font-weight: 600;
-        }
+  .link-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 15px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
 
-        .quality-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-        }
+  .link-btn:active { background: var(--border); transform: scale(0.98); }
 
-        .quality-btn.selected {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: #fff;
-        }
+  .link-btn .link-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
 
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            opacity: 0.8;
-            font-size: 13px;
-        }
+  .link-btn .link-label { flex: 1; }
 
-        .install-prompt {
-            background: rgba(34, 197, 94, 0.2);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
+  .link-btn .link-arrow {
+    color: var(--muted);
+    font-size: 16px;
+  }
 
-        .install-prompt.active {
-            display: block;
-        }
+  .link-btn.primary {
+    background: var(--green-dim);
+    border-color: rgba(77,255,145,0.25);
+    color: var(--green);
+  }
 
-        .install-prompt button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            background: #22c55e;
-            border: none;
-            border-radius: 8px;
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-        }
+  .err-msg {
+    font-size: 13px;
+    color: var(--red);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
+  }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+  /* ── LOADING ── */
+  .loading-wrap {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 32px 0;
+  }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+  .loading-wrap.visible { display: flex; }
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+  .loader {
+    width: 36px;
+    height: 36px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 24px;
-            }
-            
-            .card {
-                padding: 20px;
-            }
-        }
-    </style>
+  .loading-text {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* ── INSTALL BANNER ── */
+  .install-banner {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    align-items: center;
+    gap: 12px;
+    animation: slideUp 0.3s ease;
+  }
+
+  .install-banner.visible { display: flex; }
+
+  .install-banner p {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--muted);
+  }
+
+  .install-banner strong { color: var(--text); }
+
+  .install-go {
+    padding: 9px 16px;
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    color: #0a0a0a;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    margin-top: auto;
+    padding-top: 24px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--border);
+    letter-spacing: 0.5px;
+    line-height: 1.8;
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📱 Video Downloader</h1>
-            <p>Download video tanpa watermark</p>
-        </div>
+<div class="app">
+  <header>
+    <div class="logo">vid<span>.</span>down</div>
+    <div class="badge">No Watermark</div>
+  </header>
 
-        <div class="install-prompt" id="installPrompt">
-            <p>✨ Install aplikasi ini di HP kamu biar lebih gampang!</p>
-            <button onclick="installPWA()">Install Sekarang</button>
-        </div>
+  <div id="installBanner" class="install-banner">
+    <p><strong>Install ke HP lo!</strong><br>Biar gampang dibuka kapan aja</p>
+    <button class="install-go" onclick="installPWA()">Install</button>
+  </div>
 
-        <div class="card">
-            <div class="platforms">
-                <button class="platform-btn active" data-platform="tiktok">
-                    🎵 TikTok
-                </button>
-                <button class="platform-btn" data-platform="instagram">
-                    📷 Instagram
-                </button>
-                <button class="platform-btn" data-platform="facebook">
-                    👍 Facebook
-                </button>
-            </div>
+  <div class="tabs">
+    <button class="tab active" data-p="tiktok" onclick="setP(this)">
+      <span class="tab-icon">🎵</span> TikTok
+    </button>
+    <button class="tab" data-p="instagram" onclick="setP(this)">
+      <span class="tab-icon">📷</span> Insta
+    </button>
+    <button class="tab" data-p="facebook" onclick="setP(this)">
+      <span class="tab-icon">👍</span> FB
+    </button>
+  </div>
 
-            <div class="input-group">
-                <div class="input-wrapper">
-                    <input 
-                        type="text" 
-                        id="videoUrl" 
-                        placeholder="Paste link video di sini..."
-                        autocomplete="off"
-                    >
-                    <button class="clear-btn" onclick="clearInput()">×</button>
-                </div>
-            </div>
-
-            <button class="download-btn" onclick="downloadVideo()">
-                🚀 Download Video
-            </button>
-
-            <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>Sedang memproses...</p>
-            </div>
-
-            <div class="result" id="result"></div>
-        </div>
-
-        <div class="footer">
-            <p>💡 Gunakan untuk video kamu sendiri ya!</p>
-            <p style="margin-top: 5px; opacity: 0.7;">Hargai kreator konten lainnya 🙏</p>
-        </div>
+  <div class="input-card">
+    <span class="input-label">Link Video</span>
+    <div class="input-row">
+      <input class="url-input" type="url" id="vurl"
+        placeholder="https://www.tiktok.com/..."
+        autocomplete="off" autocorrect="off" spellcheck="false"
+      />
+      <button class="paste-btn" onclick="pasteClipboard()" title="Paste">📋</button>
     </div>
+  </div>
 
-    <script>
-        let selectedPlatform = 'tiktok';
-        let deferredPrompt;
+  <button class="dl-btn" id="gobtn" onclick="doFetch()">
+    ⬇ Download Sekarang
+  </button>
 
-        // Platform button handler
-        document.querySelectorAll('.platform-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                selectedPlatform = this.dataset.platform;
-                
-                // Update placeholder
-                const placeholders = {
-                    tiktok: 'https://www.tiktok.com/@username/video/...',
-                    instagram: 'https://www.instagram.com/reel/...',
-                    facebook: 'https://www.facebook.com/watch/...'
-                };
-                document.getElementById('videoUrl').placeholder = placeholders[selectedPlatform];
-            });
-        });
+  <div class="loading-wrap" id="loadWrap">
+    <div class="loader"></div>
+    <div class="loading-text">FETCHING LINK...</div>
+  </div>
 
-        function clearInput() {
-            document.getElementById('videoUrl').value = '';
-            document.getElementById('videoUrl').focus();
-        }
+  <div class="result-card" id="resCard"></div>
 
-        async function downloadVideo() {
-            const url = document.getElementById('videoUrl').value.trim();
-            const loading = document.getElementById('loading');
-            const result = document.getElementById('result');
-            const downloadBtn = document.querySelector('.download-btn');
+  <footer>
+    hanya untuk video milik sendiri &nbsp;·&nbsp; hormati kreator lain<br>
+    vid.down v2.0 &nbsp;·&nbsp; powered by tiklydown api
+  </footer>
+</div>
 
-            if (!url) {
-                showResult('❌ Masukin link video dulu bro!', 'error');
-                return;
-            }
+<script>
+let platform = 'tiktok';
+let deferredPrompt = null;
 
-            // Validate URL
-            if (!isValidUrl(url)) {
-                showResult('❌ Link tidak valid! Pastikan kamu paste link yang benar.', 'error');
-                return;
-            }
+/* ── PWA Install ── */
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('visible');
+});
 
-            downloadBtn.disabled = true;
-            loading.classList.add('active');
-            result.classList.remove('active');
+function installPWA() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => {
+    document.getElementById('installBanner').classList.remove('visible');
+    deferredPrompt = null;
+  });
+}
 
-            try {
-                // API call menggunakan API publik
-                const apiUrl = getApiUrl(selectedPlatform, url);
-                
-                const response = await fetch(apiUrl);
-                const data = await response.json();
+/* ── Platform switch ── */
+function setP(btn) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  platform = btn.dataset.p;
+  const ph = {
+    tiktok: 'https://www.tiktok.com/@user/video/...',
+    instagram: 'https://www.instagram.com/reel/...',
+    facebook: 'https://www.facebook.com/watch/...'
+  };
+  document.getElementById('vurl').placeholder = ph[platform];
+  hide();
+}
 
-                loading.classList.remove('active');
-                downloadBtn.disabled = false;
+/* ── Paste from clipboard ── */
+async function pasteClipboard() {
+  try {
+    const text = await navigator.clipboard.readText();
+    document.getElementById('vurl').value = text;
+  } catch(e) {
+    document.getElementById('vurl').focus();
+  }
+}
 
-                if (data.error || !data.video_url) {
-                    showResult('❌ Gagal mengambil video. Coba lagi atau cek link-nya.', 'error');
-                    return;
-                }
+/* ── UI helpers ── */
+function hide() {
+  document.getElementById('resCard').classList.remove('visible');
+  document.getElementById('resCard').className = 'result-card';
+  document.getElementById('loadWrap').classList.remove('visible');
+}
 
-                // Show success result with download button
-                showSuccessResult(data);
+function showLoad() {
+  document.getElementById('loadWrap').classList.add('visible');
+  document.getElementById('resCard').classList.remove('visible');
+}
 
-            } catch (error) {
-                loading.classList.remove('active');
-                downloadBtn.disabled = false;
-                showResult('❌ Terjadi kesalahan: ' + error.message, 'error');
-            }
-        }
+function hideLoad() {
+  document.getElementById('loadWrap').classList.remove('visible');
+}
 
-        function getApiUrl(platform, url) {
-            // Menggunakan API publik yang tersedia
-            // Catatan: API ini adalah contoh, mungkin perlu diganti dengan API yang aktif
-            const apis = {
-                tiktok: `https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(url)}`,
-                instagram: `https://api.downloadvideo.net/api/instagram?url=${encodeURIComponent(url)}`,
-                facebook: `https://api.downloadvideo.net/api/facebook?url=${encodeURIComponent(url)}`
-            };
-            
-            return apis[platform];
-        }
+function showErr(msg) {
+  const c = document.getElementById('resCard');
+  c.className = 'result-card err visible';
+  c.innerHTML = `<div class="err-msg"><span>⚠️</span><span>${msg}</span></div>`;
+}
 
-        function isValidUrl(url) {
-            const patterns = {
-                tiktok: /tiktok\.com/i,
-                instagram: /instagram\.com/i,
-                facebook: /facebook\.com|fb\.watch/i
-            };
-            
-            return patterns[selectedPlatform].test(url);
-        }
+function showOk(html, meta) {
+  const c = document.getElementById('resCard');
+  c.className = 'result-card ok visible';
+  let metaHtml = '';
+  if (meta) {
+    metaHtml = `<div class="result-meta">
+      ${meta.author ? `<div class="result-author">@${esc(meta.author)}</div>` : ''}
+      ${meta.title ? `<div class="result-title">${esc(meta.title)}</div>` : ''}
+    </div>`;
+  }
+  c.innerHTML = metaHtml + `<div class="result-links">${html}</div>`;
+}
 
-        function showResult(message, type) {
-            const result = document.getElementById('result');
-            result.className = `result ${type} active`;
-            result.innerHTML = `<p>${message}</p>`;
-        }
+function linkBtn(href, label, icon, primary) {
+  return `<a class="link-btn${primary?' primary':''}" href="${esc(href)}" target="_blank" rel="noopener">
+    <span class="link-icon">${icon}</span>
+    <span class="link-label">${label}</span>
+    <span class="link-arrow">↗</span>
+  </a>`;
+}
 
-        function showSuccessResult(data) {
-            const result = document.getElementById('result');
-            result.className = 'result success active';
-            
-            let html = `
-                <p style="margin-bottom: 15px;">✅ Video berhasil diambil!</p>
-            `;
+function esc(s) {
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
 
-            // Video preview jika tersedia
-            if (data.video_url) {
-                html += `
-                    <div class="video-preview">
-                        <video controls poster="${data.thumbnail || ''}">
-                            <source src="${data.video_url}" type="video/mp4">
-                        </video>
-                    </div>
-                `;
-            }
+/* ── Main fetch ── */
+async function doFetch() {
+  const url = document.getElementById('vurl').value.trim();
+  if (!url) { showErr('Paste link video dulu bro!'); return; }
 
-            // Video info
-            if (data.title || data.author) {
-                html += `<div class="video-info">`;
-                if (data.author) html += `<p><strong>Author:</strong> ${data.author}</p>`;
-                if (data.title) html += `<p><strong>Title:</strong> ${data.title}</p>`;
-                html += `</div>`;
-            }
+  const btn = document.getElementById('gobtn');
+  btn.disabled = true;
+  showLoad();
 
-            // Quality options if available
-            if (data.qualities && data.qualities.length > 1) {
-                html += `<div class="quality-options">`;
-                data.qualities.forEach((q, i) => {
-                    html += `
-                        <button class="quality-btn ${i === 0 ? 'selected' : ''}" 
-                                onclick="selectQuality('${q.url}', this)">
-                            ${q.quality}
-                        </button>
-                    `;
-                });
-                html += `</div>`;
-            }
+  try {
+    if (platform === 'tiktok') await fetchTikTok(url);
+    else if (platform === 'instagram') await fetchIG(url);
+    else await fetchFB(url);
+  } catch(e) {
+    showErr('Gagal: ' + e.message + '<br><small style="opacity:0.7">Cek link-nya, atau coba lagi.</small>');
+  }
 
-            // Download button
-            html += `
-                <button class="download-btn" style="margin-top: 15px;" 
-                        onclick="directDownload('${data.video_url}', '${data.filename || 'video.mp4'}')">
-                    💾 Download Sekarang
-                </button>
-            `;
+  hideLoad();
+  btn.disabled = false;
+}
 
-            result.innerHTML = html;
-        }
+/* ── TikTok ── */
+async function fetchTikTok(url) {
+  const res = await fetch('https://api.tiklydown.eu.org/api/download/v3?url=' + encodeURIComponent(url));
+  if (!res.ok) throw new Error('API error ' + res.status);
+  const d = await res.json();
+  if (!d || d.code !== 0) throw new Error(d?.msg || 'Data tidak ditemukan');
 
-        function selectQuality(url, btn) {
-            document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            // Update download URL
-            const downloadBtn = document.querySelector('.result .download-btn');
-            downloadBtn.onclick = () => directDownload(url, 'video.mp4');
-        }
+  const v = d.data;
+  let links = '';
+  if (v.play)   links += linkBtn(v.play,   'Video tanpa watermark ✨', '🎬', true);
+  if (v.wmplay) links += linkBtn(v.wmplay, 'Video dengan watermark',   '🎵');
+  if (v.music)  links += linkBtn(v.music,  'Audio saja (MP3)',         '🎧');
 
-        async function directDownload(url, filename) {
-            try {
-                const response = await fetch(url);
-                const blob = await response.blob();
-                const blobUrl = URL.createObjectURL(blob);
-                
-                const a = document.createElement('a');
-                a.href = blobUrl;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(blobUrl);
-                
-                showResult('✅ Download dimulai! Cek folder download kamu.', 'success');
-            } catch (error) {
-                showResult('❌ Gagal download. Coba buka link di browser: <a href="' + url + '" target="_blank" style="color: #fff; text-decoration: underline;">Klik di sini</a>', 'error');
-            }
-        }
+  showOk(links, {
+    author: v.author?.nickname,
+    title:  v.title
+  });
+}
 
-        // PWA Installation
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('installPrompt').classList.add('active');
-        });
+/* ── Instagram ── */
+async function fetchIG(url) {
+  /* Coba via cobadl / snapinsta public proxy */
+  const proxyUrl = 'https://snapinsta.app/api/ajaxSearch';
+  let links = '';
 
-        function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        document.getElementById('installPrompt').classList.remove('active');
-                    }
-                    deferredPrompt = null;
-                });
-            }
-        }
+  try {
+    const form = new FormData();
+    form.append('url', url);
+    form.append('lang', 'id');
+    const res = await fetch(proxyUrl, { method: 'POST', body: form });
+    const d = await res.json();
+    if (d?.data) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(d.data, 'text/html');
+      doc.querySelectorAll('a[href*=".mp4"], a[href*="download"]').forEach(a => {
+        links += linkBtn(a.href, 'Download Video', '🎬', !links);
+      });
+    }
+  } catch(_) {}
 
-        // Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('data:application/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdpbnN0YWxsJywgZXZlbnQgPT4ge2V2ZW50LndhaXRVbnRpbChzZWxmLnNraXBXYWl0aW5nKCkpO30pO3NlbGYuYWRkRXZlbnRMaXN0ZW5lcignYWN0aXZhdGUnLCBldmVudCA9PiB7ZXZlbnQud2FpdFVudGlsKHNlbGYuY2xpZW50cy5jbGFpbSgpKTt9KTtzZWxmLmFkZEV2ZW50TGlzdGVuZXIoJ2ZldGNoJywgZXZlbnQgPT4ge2V2ZW50LnJlc3BvbmRXaXRoKGZldGNoKGV2ZW50LnJlcXVlc3QpKTt9KTs=')
-                    .catch(err => console.log('SW registration failed:', err));
-            });
-        }
+  if (!links) {
+    /* Fallback: redirect ke snapinsta */
+    links = linkBtn(
+      'https://snapinsta.app/?url=' + encodeURIComponent(url),
+      'Buka di SnapInsta.app',
+      '🔗', true
+    ) + linkBtn(
+      'https://igram.world/?url=' + encodeURIComponent(url),
+      'Buka di iGram.world',
+      '🔗'
+    );
+    showOk(links);
+    return;
+  }
 
-        // Enter key to download
-        document.getElementById('videoUrl').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                downloadVideo();
-            }
-        });
-    </script>
+  showOk(links);
+}
+
+/* ── Facebook ── */
+async function fetchFB(url) {
+  /* Coba via fdown/snapsave public endpoint */
+  let links = '';
+
+  try {
+    const res = await fetch('https://fdown.net/download.php?URLz=' + encodeURIComponent(url));
+    const text = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/html');
+    const hdLink = doc.querySelector('#hdlink');
+    const sdLink = doc.querySelector('#sdlink');
+    if (hdLink?.href) links += linkBtn(hdLink.href, 'Kualitas HD', '🎬', true);
+    if (sdLink?.href) links += linkBtn(sdLink.href, 'Kualitas SD', '📱');
+  } catch(_) {}
+
+  if (!links) {
+    links = linkBtn(
+      'https://fdown.net/?url=' + encodeURIComponent(url),
+      'Buka di FDown.net',
+      '🔗', true
+    ) + linkBtn(
+      'https://getfvid.com/?url=' + encodeURIComponent(url),
+      'Buka di GetFVid.com',
+      '🔗'
+    );
+  }
+
+  showOk(links);
+}
+
+/* ── Enter key ── */
+document.getElementById('vurl').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doFetch();
+});
+
+/* ── Service Worker ── */
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'viddown-v1';
+    self.addEventListener('install', e => {
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(self.clients.claim());
+    });
+    self.addEventListener('fetch', e => {
+      if (e.request.method !== 'GET') return;
+      if (e.request.url.includes('api.tiklydown')) return;
+      e.respondWith(
+        caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
+          if (res.ok) {
+            const clone = res.clone();
+            caches.open(CACHE).then(c => c.put(e.request, clone));
+          }
+          return res;
+        }))
+      );
+    });
+  `;
+  const swBlob = new Blob([swCode], {type: 'application/javascript'});
+  const swUrl = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+</script>
 </body>
 </html>
