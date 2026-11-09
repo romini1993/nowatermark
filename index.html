@@ -179,18 +179,24 @@
 
   <footer>
     hanya untuk video milik sendiri · hormati kreator lain<br>
-    vid.down v3.0
+    vid.down v4.0
   </footer>
 </div>
 
 <script>
-/* ============ KONFIGURASI (opsional) ============
-   Kalau nanti lo punya backend sendiri (yt-dlp / Cloudflare Worker),
+/* ============ KONFIGURASI ============
+   TikTok  : langsung via tikwm (nggak butuh setting apa-apa)
+   Instagram & Facebook : diambil lewat r.jina.ai (proxy baca halaman, gratis,
+            tanpa API key, dan sudah mengizinkan CORS dari browser).
+
+   BACKEND opsional: kalau nanti lo punya server sendiri (yt-dlp / Worker),
    isi URL-nya di sini. Backend harus balas JSON:
    { "url": "https://...mp4", "title": "...", "author": "..." }
-   dan menerima query ?url=LINK_VIDEO
-   Kosongin = pakai mode bawaan (TikTok via tikwm, IG/FB via situs downloader). */
+   dan menerima query ?url=LINK_VIDEO. Kalau diisi, SEMUA platform lewat backend. */
 const BACKEND = '';
+
+/* Proxy baca halaman. Ganti kalau mau pakai proxy lain. */
+const READER = 'https://r.jina.ai/';
 
 let platform = 'tiktok';
 const $ = id => document.getElementById(id);
@@ -261,7 +267,7 @@ async function saveFile(href, name) {
   const a = document.createElement('a');
   a.href = u; a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(u), 5000);
+  setTimeout(() => URL.revokeObjectURL(u), 60000);
 }
 
 /* klik tombol download → simpan file; kalau diblok browser, buka di tab baru */
@@ -277,10 +283,6 @@ $('resCard').addEventListener('click', async e => {
   }
   a.classList.remove('busy');
 });
-
-async function copyText(t) {
-  try { await navigator.clipboard.writeText(t); return true; } catch (_) { return false; }
-}
 
 async function getJSON(url, opts) {
   const ctrl = new AbortController();
@@ -323,14 +325,160 @@ async function fetchTikTok(url) {
 }
 
 /* ---------- Instagram & Facebook ----------
-   Browser tidak bisa ambil langsung dari situs downloader (diblok CORS).
-   Jadi: link otomatis disalin, lalu lo buka situs downloader dan tinggal tempel. */
-async function fetchViaSites(url, sites) {
-  const copied = await copyText(url);
-  const links = sites.map((s, i) => linkBtn(s.href, 'Buka ' + s.name, '🔗', i === 0)).join('');
-  showOk(links, null,
-    (copied ? '✅ Link sudah disalin. ' : '') +
-    'Buka salah satu situs di bawah, lalu tempel link-nya (tahan lama → Tempel) dan tekan download.');
+   Browser diblok CORS kalau akses IG/FB langsung. Jadi halamannya dibaca
+   lewat READER (r.jina.ai) yang mengizinkan CORS, lalu link video aslinya
+   diambil dari HTML-nya. CDN Instagram & Facebook mengizinkan CORS, jadi
+   file videonya bisa langsung disimpan dari browser. */
+
+async function readPage(url) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 45000);
+  try {
+    const r = await fetch(READER + url, {
+      headers: { 'X-Return-Format': 'html' },
+      signal: ctrl.signal
+    });
+    if (r.status === 429) throw new Error('Server baca lagi ramai (limit 20/menit). Tunggu 1 menit, lalu coba lagi.');
+    if (!r.ok) throw new Error('Gagal membaca halaman (HTTP ' + r.status + ')');
+    return await r.text();
+  } catch (e) {
+    if (e.name === 'AbortError') throw new Error('Kelamaan ambil data. Coba lagi.');
+    if (e instanceof TypeError) throw new Error('Tidak bisa terhubung ke server baca. Cek internet, lalu coba lagi.');
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/* cari object pertama yang punya key tertentu di dalam JSON besar */
+function findKey(obj, key, depth) {
+  depth = depth || 0;
+  if (!obj || typeof obj !== 'object' || depth > 60) return null;
+  if (Array.isArray(obj)) {
+    for (const v of obj) { const r = findKey(v, key, depth + 1); if (r) return r; }
+    return null;
+  }
+  if (obj[key]) return obj[key];
+  for (const k in obj) { const r = findKey(obj[k], key, depth + 1); if (r) return r; }
+  return null;
+}
+
+/* kumpulkan semua video dalam satu post (termasuk carousel) */
+function collectVideos(node, out, seen, author) {
+  out = out || []; seen = seen || {};
+  if (!node || typeof node !== 'object') return out;
+  if (Array.isArray(node)) {
+    node.forEach(n => collectVideos(n, out, seen, author));
+    return out;
+  }
+  const who = (node.user && node.user.username) || author || '';
+  const vv = node.video_versions;
+  if (Array.isArray(vv) && vv.length && vv[0] && vv[0].url && !seen[vv[0].url]) {
+    seen[vv[0].url] = 1;
+    out.push({
+      url: vv[0].url,
+      author: who,
+      title: (node.caption && node.caption.text) || ''
+    });
+  }
+  for (const k in node) collectVideos(node[k], out, seen, who);
+  return out;
+}
+
+function igMediaJson(html) {
+  const re = /<script[^>]*type="application\/json"[^>]*>([\s\S]*?)<\/script>/g;
+  let m;
+  while ((m = re.exec(html))) {
+    if (m[1].indexOf('xig_polaris_media') === -1) continue;
+    try {
+      const media = findKey(JSON.parse(m[1]), 'xig_polaris_media');
+      if (media) return media;
+    } catch (_) {}
+  }
+  return null;
+}
+
+function unescJson(s) {
+  return String(s == null ? '' : s)
+    .replace(/\\u([0-9a-fA-F]{4})/g, (_, h) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/\\n/g, ' ')
+    .replace(/\\"/g, '"')
+    .replace(/\\\//g, '/');
+}
+
+async function fetchInstagram(url) {
+  const html = await readPage(url);
+  const media = igMediaJson(html);
+  if (!media) {
+    if (/loginForm|Log in to Instagram|loginRequired/i.test(html)) {
+      throw new Error('Post ini nggak bisa dibuka tanpa login (private / dibatasi).');
+    }
+    throw new Error('Video nggak ketemu. Pastikan post-nya publik dan berisi video.');
+  }
+  const info = media.if_not_gated_logged_out || media;
+  const items = collectVideos(info);
+  if (!items.length) throw new Error('Post ini nggak berisi video (kemungkinan cuma foto).');
+
+  const author = (info.user && info.user.username) || items[0].author;
+  const title = unescJson((info.caption && info.caption.text) || items[0].title || '')
+    .replace(/\s+/g, ' ').trim();
+  const stamp = Date.now();
+  const links = items.map((it, i) => linkBtn(
+    it.url,
+    items.length > 1 ? 'Video ' + (i + 1) : 'Download video ✨',
+    '🎬', i === 0,
+    'instagram-' + stamp + (items.length > 1 ? '-' + (i + 1) : '') + '.mp4'
+  )).join('');
+
+  showOk(links, { author, title }, items.length > 1
+    ? 'Post ini berisi ' + items.length + ' video. Tekan satu per satu buat menyimpan.'
+    : null);
+}
+
+async function fetchFacebook(url) {
+  const decode = s => s.replace(/\\\//g, '/').replace(/\\u0026/g, '&').replace(/&amp;/g, '&');
+  const pickFrom = (s, re) => {
+    const m = s.match(re);
+    return m && m[1] && m[1] !== 'null' ? m[1] : null;
+  };
+
+  const plugin = 'https://www.facebook.com/plugins/video.php?href=' +
+    encodeURIComponent(url) + '&show_text=false';
+  const flat = decode(await readPage(plugin));
+  const pick = re => pickFrom(flat, re);
+
+  const hd = pick(/"hd_src":"([^"]+)"/);
+  const sd = pick(/"sd_src":"([^"]+)"/);
+  const playHd = pick(/"playable_url_quality_hd":"([^"]+)"/);
+  const playSd = pick(/"playable_url":"([^"]+)"/);
+  let video = hd || playHd || playSd || sd;
+  let quality = (hd || playHd) ? 'HD' : '';
+
+  /* Link "share" / fb.watch / reel kadang nggak kebaca lewat plugin.
+     Coba baca halaman aslinya (redirect-nya ikut diikuti). */
+  if (!video) {
+    const page = decode(await readPage(url));
+    const phd = pickFrom(page, /"browser_native_hd_url":"([^"]+)"/);
+    const pq = pickFrom(page, /"playable_url_quality_hd":"([^"]+)"/);
+    const psd = pickFrom(page, /"browser_native_sd_url":"([^"]+)"/);
+    const pn = pickFrom(page, /"playable_url":"([^"]+)"/);
+    video = phd || pq || psd || pn;
+    quality = (phd || pq) ? 'HD' : '';
+  }
+
+  if (!video) {
+    throw new Error('Video nggak ketemu. Pastikan videonya publik (bukan private / grup tertutup).');
+  }
+
+  const title = unescJson(pick(/"title":"([^"]*)"/) || '');
+  const author = unescJson(pick(/"ownerName":"([^"]*)"/) || pick(/"author":"([^"]*)"/) || '');
+  const stamp = Date.now();
+  let links = linkBtn(video, quality === 'HD' ? 'Download video HD ✨' : 'Download video ✨',
+    '🎬', true, 'facebook-' + stamp + '.mp4');
+  if (hd && sd && sd !== hd) {
+    links += linkBtn(sd, 'Download kualitas biasa', '📱', false, 'facebook-sd-' + stamp + '.mp4');
+  }
+  showOk(links, { author, title });
 }
 
 /* ---------- main ---------- */
@@ -346,18 +494,16 @@ async function doFetch() {
   btn.disabled = true;
   resetUI();
   $('loadWrap').classList.add('visible');
+  const lt = $('loadWrap').querySelector('.loading-text');
+  if (lt) lt.textContent = platform === 'instagram' ? 'MENGAMBIL VIDEO INSTAGRAM...'
+    : platform === 'facebook' ? 'MENGAMBIL VIDEO FACEBOOK...'
+    : 'MENGAMBIL LINK...';
 
   try {
     if (BACKEND) await fetchBackend(url);
     else if (platform === 'tiktok') await fetchTikTok(url);
-    else if (platform === 'instagram') await fetchViaSites(url, [
-      { name: 'SnapInsta', href: 'https://snapinsta.app/' },
-      { name: 'iGram', href: 'https://igram.world/' }
-    ]);
-    else await fetchViaSites(url, [
-      { name: 'FDown', href: 'https://fdown.net/' },
-      { name: 'GetFVid', href: 'https://getfvid.com/' }
-    ]);
+    else if (platform === 'instagram') await fetchInstagram(url);
+    else await fetchFacebook(url);
   } catch (e) {
     showErr('Gagal: ' + esc(e.message) + '<br><small style="opacity:0.7">Cek link-nya (harus video publik), lalu coba lagi.</small>');
   }
